@@ -1,14 +1,10 @@
 import sqlite3
-from typing import Counter
 
 
 class DB_Connection:
     def __init__(self, path_name) -> None:
         self.connection = None
-        try:
-            self.connection = sqlite3.connect(path_name)
-        except Error as e:
-            print(e)
+        self.connection = sqlite3.connect(path_name)
 
     def insert_student(self, name, am, phone) -> None:
         cursor = self.connection.cursor()
