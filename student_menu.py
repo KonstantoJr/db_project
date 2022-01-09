@@ -3,8 +3,8 @@ import datetime
 
 
 class Menu:
-    def __init__(self) -> None:
-        self.db = sq.DB_Connection("merimna.db")
+    def __init__(self, db_path) -> None:
+        self.db = sq.DB_Connection(db_path)
         self.am = self.login()
         self.option = self.basic_menu()
         if self.option == "1":
@@ -88,6 +88,7 @@ class Menu:
                 total_mhtros,
                 ar_melon_oikegias,
             )
+            self.add_files(id)
         else:
             print(
                 f"There is already a food application\nThe status of the application is: {results[0][3]}"
@@ -146,11 +147,31 @@ class Menu:
                 stratiotikh_thhteia_aderfou,
                 melh_oikogenias_me_eidikes_anagkes,
             )
+            self.add_files(id)
         else:
             print(
                 f"There is already a housing application\nThe status of the application is: {results[0][3]}"
             )
 
+    def add_files(self, id):
+        file = input(
+            "Enter the path of the file you want to submit.\n Press enter to stop submitting.\n"
+        )
+        while file != "":
+            self.db.add_file(id, file.strip())
+            while True:
+                file = input()
+                eggrafa = self.db.retrieval_query(
+                    f"SELECT ONOMA FROM EGGRAFA WHERE ID_AITHSHS = {id}"
+                )
+                for onoma in eggrafa:
+                    if file.strip() == onoma[0]:
+                        print(onoma[0])
+                        print("Already submitted file.")
+                        break
+                else:
+                    break
+
 
 if __name__ == "__main__":
-    menu = Menu()
+    menu = Menu("Data_Creation/merimna.db")
