@@ -114,6 +114,13 @@ class DB_Connection:
         cursor.execute(sql, values)
         self.connection.commit()
 
+    def add_file(self, id, name):
+        cursor = self.connection.cursor()
+        sql = """INSERT INTO EGGRAFA 
+        VALUES(?,?)"""
+        cursor.execute(sql, (id, name))
+        self.connection.commit()
+
     def clear_table(self, table):
         cursor = self.connection.cursor()
         cursor.execute(f"DELETE  FROM {table}")
@@ -121,9 +128,10 @@ class DB_Connection:
 
 
 if __name__ == "__main__":
-    db = DB_Connection("merimna.db")
+    db = DB_Connection("Data_Creation/merimna.db")
     # db.insert_student("Κώστας Κωνσταντόπουλος", 1066546, 6948647574)
     # print(db.retrieval_query("SELECT * FROM FOITHTHS WHERE AM = 1066546"))
     db.clear_table("KANEI_AITHSH")
     db.clear_table("AITHSH_STEGASHS")
     db.clear_table("AITHSH_SITHSHS")
+    db.clear_table("EGGRAFA")
