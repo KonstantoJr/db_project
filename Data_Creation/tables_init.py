@@ -1,9 +1,9 @@
 import sqlite3
 
 
-def generate(db_path):
+def generate(script_path, db_path):
     conn = sqlite3.connect(db_path)
-    with open("database.sql", "r") as file:
+    with open(script_path, "r") as file:
         sql = ""
         for row in file:
             sql += row
