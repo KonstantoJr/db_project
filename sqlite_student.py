@@ -1,5 +1,4 @@
 import sqlite3
-from sqlite3.dbapi2 import Cursor
 
 
 class DB_Connection:
@@ -34,7 +33,6 @@ class DB_Connection:
         VALUES(?,?,?,?,?)"""
         cursor.execute(sql, (id, am, hm, katastash, eidos_aithshs))
         self.connection.commit()
-        return id
 
     def del_files(self, id):
         sql = f"""DELETE FROM EGGRAFA
@@ -59,16 +57,27 @@ class DB_Connection:
         SET KATASTASH = 'SE ANAMONH'
         WHERE ID = {id}"""
         sql = f"""UPDATE AITHSH_SITHSHS
-        SET 'AK_ETOS_EGGRAFHS' = '{ak_etos_eggrafhs}',
-        'D/NSH_KATOIKIAS' = '{dnsh_katoikias}',
-        'D/NSH_MONIMHS_KATOIKIAS' = '{dnsh_monimhs}',
-        'BARCODE_PASOU' = '{barcode}',
-        'SYNOLIKO_EISODHMA_PATROS' = '{total_patros}',
-        'SYNOLIKO_EISODHMA_MHTROS' = '{total_mhtros}',
-        'AR_MELON_OIKOGENEIAS' = '{ar_melon_oikegias}'
+        SET 'AK_ETOS_EGGRAFHS' = ?,
+        'D/NSH_KATOIKIAS' = ?,
+        'D/NSH_MONIMHS_KATOIKIAS' = ?,
+        'BARCODE_PASOU' = ?,
+        'SYNOLIKO_EISODHMA_PATROS' = ?,
+        'SYNOLIKO_EISODHMA_MHTROS' = ?,
+        'AR_MELON_OIKOGENEIAS' = ?
         WHERE ID = {id};"""
         cursor = self.connection.cursor()
-        cursor.execute(sql)
+        cursor.execute(
+            sql,
+            (
+                ak_etos_eggrafhs,
+                dnsh_katoikias,
+                dnsh_monimhs,
+                barcode,
+                total_patros,
+                total_mhtros,
+                ar_melon_oikegias,
+            ),
+        )
         self.connection.commit()
         cursor.execute(sql2)
         self.connection.commit()
@@ -84,7 +93,6 @@ class DB_Connection:
         total_patros,
         total_mhtros,
         ar_melon_oikegias,
-        new: bool,
     ):
         cursor = self.connection.cursor()
         sql = """INSERT INTO AITHSH_SITHSHS
@@ -164,6 +172,19 @@ class DB_Connection:
         cursor.execute(f"DELETE  FROM {table}")
         self.connection.commit()
 
+    def purchase_history(self, am):
+        sql = f"""SELECT HM_AGORAS, POSOTHTA , TIMH
+        FROM AGORA_KOUPONION
+        WHERE AM = {am}
+        ORDER BY HM_AGORAS DESC"""
+        results = self.retrieval_query(sql)
+        if len(results) == 0:
+            print("You have not made a purchase yet.")
+            return
+        print("HM_AGORAS\tPOSOTHTA\tTIMH")
+        for i in results:
+            print(f"{i[0]}\t{i[1]}\t\t{i[2]}")
+
 
 if __name__ == "__main__":
     db = DB_Connection("Data_Creation/merimna.db")
@@ -173,6 +194,10 @@ if __name__ == "__main__":
     # db.clear_table("AITHSH_STEGASHS")
     # db.clear_table("AITHSH_SITHSHS")
     # db.clear_table("EGGRAFA")
-    db.clear_table("LAMVANEI")
-    db.clear_table("KARTA_SITHSHS")
+    # db.clear_table("LAMVANEI")
+    # db.clear_table("KARTA_SITHSHS")
     # db.clear_table("AGORA_KOUPONION")
+    sql = """DROP TABLE IF EXISTS FOITHTHS"""
+    cursor = db.connection.cursor()
+    cursor.execute(sql)
+    db.connection.commit()
