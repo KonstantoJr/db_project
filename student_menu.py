@@ -6,27 +6,27 @@ class Menu:
     def __init__(self, db_path) -> None:
         self.db = sq.DB_Connection(db_path)
         self.am = self.login()
-        self.option = self.basic_menu()
-        if self.option == "1":
-            # some code here
-            self.coupons()
-        elif self.option == "2":
-            # some code here
-            self.food_application()
-            return
-        elif self.option == "3":
-            # some code here
-            self.housing_application()
-            return
-        else:
-            return
+        while True:
+            self.option = self.basic_menu()
+            if self.option == "1":
+                self.coupons()
+            elif self.option == "2":
+                self.db.purchase_history(self.am)
+            elif self.option == "3":
+                self.food_application()
+            elif self.option == "4":
+                self.housing_application()
+            elif self.option == "-1":
+                return
 
     @staticmethod
     def input_number(text, error):
         while True:
             inp = input(text)
             if inp.isdigit():
-                return inp
+                return inp, 1
+            elif inp == "-1":
+                return None, -1
             print(error)
 
     @staticmethod
@@ -37,25 +37,83 @@ class Menu:
                 return options[inp]
             print(error)
 
-    def login(self) -> None:
+    @staticmethod
+    def food_application_form_input() -> None | list:
+        order = 0
+        ak_etos_eggrafhs = None
+        dnsh_katoikias = None
+        dnsh_monimhs = None
+        barcode = None
+        total_patros = None
+        total_mhtros = None
+        ar_melon_oikegias = None
         while True:
-            print("Give your AM")
-            am = input()
-            if am.isdigit():
-                break
-            else:
-                print("Not a nnumber")
+            if order == 0:
+                ak_etos_eggrafhs, step = Menu.input_number(
+                    "Academic year of entry: ", "Not a valid year"
+                )
+                if step == -1:
+                    return [None] * 7
+                order += step
+            elif order == 1:
+                dnsh_katoikias = input("Address of residence: ")
+                if dnsh_katoikias == "-1":
+                    order += -1
+                else:
+                    order += 1
+            elif order == 2:
+                dnsh_monimhs = input("Address of main residence: ")
+                if dnsh_monimhs == "-1":
+                    order += -1
+                else:
+                    order += 1
+            elif order == 3:
+                barcode, step = Menu.input_number(
+                    "Barcode of academic id: ", "Not a number"
+                )
+                order += step
+            elif order == 4:
+                total_patros, step = Menu.input_number(
+                    "Total income of father: ", "Not a number"
+                )
+                order += step
+            elif order == 5:
+                total_mhtros, step = Menu.input_number(
+                    "Total income of mother: ", "Not a number"
+                )
+                order += step
+            elif order == 6:
+
+                ar_melon_oikegias, step = Menu.input_number(
+                    "Number of people in family: ", "Not a number"
+                )
+                order += step
+            elif order >= 7:
+                return [
+                    ak_etos_eggrafhs,
+                    dnsh_katoikias,
+                    dnsh_monimhs,
+                    barcode,
+                    total_patros,
+                    total_mhtros,
+                    ar_melon_oikegias,
+                ]
+
+    def login(self) -> None:
+        am, _ = Menu.input_number("Give your AM: ", "Not a number")
         if len(self.db.retrieval_query(f"SELECT * FROM FOITHTHS WHERE AM = {am}")) == 0:
             name = input("Write your full name: ")
-            phone = Menu.input_number("Write your cellphone: ", "Not a number")
+            phone, _ = Menu.input_number("Write your cellphone: ", "Not a number")
             self.db.insert_student(name, am, phone)
         return am
 
     def basic_menu(self) -> None:
         print(
-            f"Press 1 to buy food coupons\
-        \nPress 2 to make application for food\
-        \nPress 3 to make application for housing"
+            f"\nPress 1 to buy food coupons\
+        \nPress 2 to print out your purchase history\
+        \nPress 3 to make application for food\
+        \nPress 4 to make application for housing\
+        \nPress -1 to exit."
         )
         return input()
 
@@ -77,20 +135,29 @@ class Menu:
             print("Would you like to make one?")
             if input("Yes/no (Default:Yes): ") == "no":
                 return
-            id = self.db.insert_appl(self.am, date, "SE ANAMONH", eidos_app)
-        print("Fill out the following information")
-        ak_etos_eggrafhs = Menu.input_number(
-            "Academic year of entry: ", "Not a valid year"
-        )
-        dnsh_katoikias = input("Address of residence: ")
-        dnsh_monimhs = input("Address of main residence: ")
-        barcode = Menu.input_number("Barcode of academic id: ", "Not a number")
-        total_patros = Menu.input_number("Total income of father: ", "Not a number")
-        total_mhtros = Menu.input_number("Total income of mother: ", "Not a number")
-        ar_melon_oikegias = Menu.input_number(
-            "Number of people in family: ", "Not a number"
-        )
-        if new:
+            id = len(self.db.retrieval_query("""SELECT * FROM KANEI_AITHSH""")) + 1
+        else:
+            print("Previous submission:")
+            id = int(id)
+            results = self.db.retrieval_query(
+                f"""SELECT * FROM AITHSH_SITHSHS WHERE ID = {id}"""
+            )
+            print(results[0][1:])
+        #
+        print("Fill out the following information\nPress -1 to go back a step.")
+
+        (
+            ak_etos_eggrafhs,
+            dnsh_katoikias,
+            dnsh_monimhs,
+            barcode,
+            total_patros,
+            total_mhtros,
+            ar_melon_oikegias,
+        ) = Menu.food_application_form_input()
+        #
+        if new and ak_etos_eggrafhs != None:
+            self.db.insert_appl(self.am, date, "SE ANAMONH", eidos_app)
             self.db.insert_food_appl(
                 id,
                 self.am,
@@ -103,14 +170,7 @@ class Menu:
                 ar_melon_oikegias,
             )
             self.add_files(id)
-        else:
-            print("Previous submission:")
-            print(id)
-            id = int(id)
-            results = self.db.retrieval_query(
-                f"""SELECT * FROM AITHSH_SITHSHS WHERE ID = {id}"""
-            )
-            print(results)
+        elif not new and ak_etos_eggrafhs != None:
             self.db.update_food_appl(
                 id,
                 ak_etos_eggrafhs,
@@ -121,11 +181,13 @@ class Menu:
                 total_mhtros,
                 ar_melon_oikegias,
             )
+            #
             print("Previous files:")
             results = self.db.retrieval_query(
                 f"""SELECT ONOMA FROM EGGRAFA WHERE ID_AITHSHS = {id}"""
             )
             print(results)
+            #
             self.db.del_files(id)
             self.add_files(id)
 

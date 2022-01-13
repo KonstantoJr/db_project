@@ -7,7 +7,7 @@ import AITHSH_SITHSHS
 import AITHSH_STEGASHS
 import EGGRAFA
 
-tables_init.generate("database.sql", "merimna.db")
+tables_init.generate("sqlite.sql", "merimna.db")
 FOITHTHS.generate("Names.xls", "merimna.db")
 DOMATIA.generate("DOMATIA.xls", "merimna.db")
 ESTIA.generate("ESTIA.xls", "merimna.db")
