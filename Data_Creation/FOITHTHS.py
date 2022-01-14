@@ -4,16 +4,16 @@ import pandas as pd
 
 def generate(excel_path, db_path):
     df = pd.read_excel(excel_path)
-    connection = sqlite3.connect(db_path)
-    cursor = connection.cursor()
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
 
-    for index, row in df.iterrows():
-        name = row["Name"]
-        AM = row["AM"]
-        PHONE = row["PHONE"]
-        cursor.execute(
-            f"""INSERT INTO FOITHTHS
-        VALUES ({row["AM"]},'{row["Name"]}',{row["PHONE"]});"""
-        )
+        for _, row in df.iterrows():
+            name = row["Name"]
+            AM = row["AM"]
+            PHONE = row["PHONE"]
+            cursor.execute(
+                f"""INSERT INTO FOITHTHS
+            VALUES (?,?,?);""", (AM, name, PHONE)
+            )
 
-    connection.commit()
+        connection.commit()

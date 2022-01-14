@@ -1,34 +1,36 @@
 import sqlite_admin
+import input_utils as iu
 
 
 class Admin:
     def __init__(self) -> None:
-        self.option = self.login()
         self.db = sqlite_admin.DB_Connection("Data_Creation/merimna.db")
-        if self.option == "1":
-            self.food_appl()
-        elif self.option == "2":
-            self.housing_appl()
+        while True:
+            self.option = self.login()
+            if self.option == 1:
+                self.applications("SITHSHS")
+            elif self.option == 2:
+                self.applications("ESTIAS")
+            elif self.option == -1:
+                return
 
     def login(self):
-        login = None
-        options = ("1", "2")
-        while True:
-            print(
-                f"""Press 1 to check food applications\
-            \nPress 2 to check housing applications"""
-            )
-            login = input()
-            if login in options:
-                return login
-            else:
-                print("Not a valid option.")
+        login = iu.input_method(
+            "Press 1 to check food applications\
+            \nPress 2 to check housing applications\
+            \nPress -1 to exit.\n", "Not a valid option.",
+            {"1": 1, "2": 2, "-1": -1})
+        return login
 
-    def food_appl(self):
+    def applications(self, eidos):
         while True:
-            ids = set(self.db.print_food_appl())
+            if eidos == "SITHSHS":
+                ids = set(self.db.print_application(eidos))
+            elif eidos == "ESTIAS":
+                ids = set(self.db.print_application(eidos))
             while True:
-                id = input("Enter the id of the application you want to review: ")
+                id = input(
+                    "Enter the id of the application you want to review: ")
                 if id.isdigit():
                     if int(id) in ids:
                         break
@@ -37,26 +39,9 @@ class Admin:
                 else:
                     print("Not a number")
             print()
-            self.db.select_appl_to_review(id, "SITHSHS")
-            option = input("If you want to continue press enter.\nElse press exit.\n")
-            if option == "exit":
-                break
-
-    def housing_appl(self):
-        while True:
-            ids = set(self.db.print_housing_appl())
-            while True:
-                id = input("Enter the id of the application you want to review: ")
-                if id.isdigit():
-                    if int(id) in ids:
-                        break
-                    else:
-                        print("Not a right id")
-                else:
-                    print("Not a number")
-            print()
-            self.db.select_appl_to_review(id, "ESTIAS")
-            option = input("If you want to continue press enter.\nElse press exit.\n")
+            self.db.select_appl_to_review(id, eidos)
+            option = input(
+                "If you want to continue press enter.\nElse press exit.\n")
             if option == "exit":
                 break
 
