@@ -8,10 +8,10 @@ import AITHSH_STEGASHS
 import EGGRAFA
 
 tables_init.generate("sqlite.sql", "merimna.db")
-FOITHTHS.generate("Names.xls", "merimna.db")
-DOMATIA.generate("DOMATIA.xls", "merimna.db")
-ESTIA.generate("ESTIA.xls", "merimna.db")
+FOITHTHS.generate("excel_files/Names.xls", "merimna.db")
+ESTIA.generate("merimna.db")
+DOMATIA.generate("merimna.db")
 KANEI_AITHSH.generate("merimna.db")
-AITHSH_SITHSHS.generate("KATOIKIES.xls", "merimna.db")
-AITHSH_STEGASHS.generate("KATOIKIES.xls", "merimna.db")
+AITHSH_SITHSHS.generate("excel_files/KATOIKIES.xls", "merimna.db")
+AITHSH_STEGASHS.generate("excel_files/KATOIKIES.xls", "merimna.db")
 EGGRAFA.generate("merimna.db")

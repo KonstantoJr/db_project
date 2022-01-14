@@ -1,56 +1,39 @@
 import sqlite3
+import input_utils as iu
 
 
 class DB_Connection:
     def __init__(self, db_path) -> None:
         self.conn = sqlite3.connect(db_path)
 
-    @staticmethod
-    def input_number(text, error):
-        while True:
-            inp = input(text)
-            if inp.isdigit():
-                return inp
-            print(error)
-
-    def print_food_appl(self) -> list:
-        sql = """SELECT * ,(SYNOLIKO_EISODHMA_PATROS + SYNOLIKO_EISODHMA_MHTROS) AS SYNOLIKO 
-        FROM AITHSH_SITHSHS WHERE ID IN
-        (SELECT ID FROM KANEI_AITHSH WHERE EIDOS_AITHSHS = 'SITHSHS' AND KATASTASH = 'SE ANAMONH')
-        ORDER BY SYNOLIKO"""
+    def print_application(self, eidos) -> list:
+        sql = ""
+        if eidos == "SITHSHS":
+            sql = """SELECT * ,(SYNOLIKO_EISODHMA_PATROS + SYNOLIKO_EISODHMA_MHTROS) AS SYNOLIKO 
+            FROM AITHSH_SITHSHS WHERE ID IN
+            (SELECT ID FROM KANEI_AITHSH WHERE EIDOS_AITHSHS = 'SITHSHS' AND KATASTASH = 'SE ANAMONH')
+            ORDER BY SYNOLIKO"""
+        elif eidos == "ESTIAS":
+            sql = """SELECT * ,(SYNOLIKO_EISODHMA_PATROS + SYNOLIKO_EISODHMA_MHTROS + SYNOLIKO_EISODHMA_IDIOU) AS SYNOLIKO
+            FROM AITHSH_STEGASHS WHERE ID IN
+            (SELECT ID FROM KANEI_AITHSH WHERE EIDOS_AITHSHS = 'ESTIAS' AND KATASTASH = 'SE ANAMONH')
+            ORDER BY SYNOLIKO"""
         cursor = self.conn.cursor()
         results = cursor.execute(sql).fetchall()
         names = [description[0] for description in cursor.description]
         print(names)
         ids = [row[0] for row in results]
-        for i in results:
-            print(i)
-        return ids
-
-    def print_housing_appl(self) -> list:
-        sql = """SELECT * ,(SYNOLIKO_EISODHMA_PATROS + SYNOLIKO_EISODHMA_MHTROS + SYNOLIKO_EISODHMA_IDIOU) AS SYNOLIKO
-        FROM AITHSH_STEGASHS WHERE ID IN
-        (SELECT ID FROM KANEI_AITHSH WHERE EIDOS_AITHSHS = 'ESTIAS' AND KATASTASH = 'SE ANAMONH')
-        ORDER BY SYNOLIKO"""
-        cursor = self.conn.cursor()
-        results = cursor.execute(sql).fetchall()
-        names = [description[0] for description in cursor.description]
-        ids = [row[0] for row in results]
-        print(names)
         for i in results:
             print(i)
         return ids
 
     def select_appl_to_review(self, id, eidos_aithshs) -> None:
-        table = None
         if eidos_aithshs == "ESTIAS":
-            table = "AITHSH_STEGASHS"
             sql = f"""SELECT * ,(SYNOLIKO_EISODHMA_PATROS + SYNOLIKO_EISODHMA_MHTROS+SYNOLIKO_EISODHMA_IDIOU) AS SYNOLIKO
-        FROM {table} WHERE ID = {id}"""
+            FROM AITHSH_STEGASHS WHERE ID = {id}"""
         elif eidos_aithshs == "SITHSHS":
-            table = "AITHSH_SITHSHS"
             sql = f"""SELECT * ,(SYNOLIKO_EISODHMA_PATROS + SYNOLIKO_EISODHMA_MHTROS) AS SYNOLIKO
-        FROM {table} WHERE ID = {id}"""
+            FROM AITHSH_SITHSHS WHERE ID = {id}"""
         cursor = self.conn.cursor()
         results = cursor.execute(sql).fetchall()
         if len(results) == 0:
@@ -63,20 +46,16 @@ class DB_Connection:
         results = cursor.execute(sql).fetchall()
         for res in results:
             print(res)
-        while True:
-            print("Choose the review result.")
-            output = "Select 1 for OLOKLHROTHHKE\
-            \nSelect 2 for ELLEIPHS\
-            \nSelect 3 for APORRIFTHHKE"
-            print(output)
-            katastash = input()
-            options = {"1": "OLOKLHROTHHKE", "2": "ELLEIPHS", "3": "APORRIFTHHKE"}
-            if katastash not in options.keys():
-                print("Not valid input.")
-            else:
-                break
+        print("Choose the result of the review.")
+        katastash = iu.input_method(
+            "Select 1 for OLOKLHROTHHKE\
+        \nSelect 2 for ELLEIPHS\
+        \nSelect 3 for APORRIFTHHKE",
+            "Not a valid input.",
+            {"1": "OLOKLHROTHHKE",
+             "2": "ELLEIPHS", "3": "APORRIFTHHKE"})
         sql = f"""UPDATE KANEI_AITHSH
-        SET KATASTASH = '{options[katastash]}'
+        SET KATASTASH = '{katastash}'
         WHERE ID = {id}"""
         cursor.execute(sql)
         self.conn.commit()
@@ -90,7 +69,8 @@ class DB_Connection:
         for id, am in results:
             sql = """INSERT INTO LAMVANEI
             VALUES(?,?)"""
-            card_id = len(cursor.execute("SELECT * FROM LAMVANEI").fetchall()) + 1
+            card_id = len(cursor.execute(
+                "SELECT * FROM LAMVANEI").fetchall()) + 1
             cursor.execute(sql, (am, card_id))
             sql = """ INSERT INTO KARTA_SITHSHS
             VALUES(?,?,?)"""
