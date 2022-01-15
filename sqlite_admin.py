@@ -1,5 +1,8 @@
+import enum
 import sqlite3
 import input_utils as iu
+import pandas as pd
+import math
 
 
 class DB_Connection:
@@ -20,11 +23,20 @@ class DB_Connection:
             ORDER BY SYNOLIKO"""
         cursor = self.conn.cursor()
         results = cursor.execute(sql).fetchall()
+        if len(results) == 0:
+            print(f"No {eidos} application for review.")
+            return None
         names = [description[0] for description in cursor.description]
-        print(names)
         ids = [row[0] for row in results]
-        for i in results:
-            print(i)
+        data = results
+        df = pd.DataFrame(data, columns=names)
+        if eidos == "SITHSHS":
+            with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.width', None, 'display.max_colwidth', -1):
+                print(df.to_string(index=False))
+        else:
+            with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+                print(df.to_string(index=False))
+        print()
         return ids
 
     def select_appl_to_review(self, id, eidos_aithshs) -> None:
@@ -40,20 +52,24 @@ class DB_Connection:
             print("Wrong id number.")
             return
         names = [description[0] for description in cursor.description]
-        print(names)
-        print(results[0])
+        df = pd.DataFrame(results[0], names)
+        with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+            print(df)
         sql = f"""SELECT * FROM EGGRAFA WHERE ID_AITHSHS = {id}"""
         results = cursor.execute(sql).fetchall()
         for res in results:
-            print(res)
+            print(res[1])
         print("Choose the result of the review.")
         katastash = iu.input_method(
-            "Select 1 for OLOKLHROTHHKE\
-        \nSelect 2 for ELLEIPHS\
-        \nSelect 3 for APORRIFTHHKE",
+            "Press 1 for OLOKLHROTHHKE\
+        \nPress 2 for ELLEIPHS\
+        \nPress 3 for APORRIFTHHKE\
+        \nPress -1 to exit\n",
             "Not a valid input.",
             {"1": "OLOKLHROTHHKE",
-             "2": "ELLEIPHS", "3": "APORRIFTHHKE"})
+             "2": "ELLEIPHS", "3": "APORRIFTHHKE", "-1": -1})
+        if katastash == -1:
+            return
         sql = f"""UPDATE KANEI_AITHSH
         SET KATASTASH = '{katastash}'
         WHERE ID = {id}"""
@@ -65,7 +81,7 @@ class DB_Connection:
         FROM KANEI_AITHSH 
         WHERE KATASTASH = 'OLOKLHROTHHKE' AND EIDOS_AITHSHS = 'SITHSHS'"""
         cursor = self.conn.cursor()
-        results = cursor.execute(sql)
+        results = cursor.execute(sql).fetchall()
         for id, am in results:
             sql = """INSERT INTO LAMVANEI
             VALUES(?,?)"""
@@ -81,6 +97,118 @@ class DB_Connection:
             cursor.execute(sql)
         self.conn.commit()
 
+    def calculate_rooms(self):
+        cursor = self.conn.cursor()
+        options = {
+            "FIRST_YEAR": 0.40,
+            "OLDER_YEAR": 0.30,
+            "POSTGRADUATE": 0.10,
+            "HOMOGENOUS": 0.10,
+            "FOREIGN": 0.10,
+        }
+        sql = """SELECT TOPOTHESIA_TMHMATOS , KATHGORIA,COUNT(KATHGORIA)
+        FROM AITHSH_STEGASHS
+        GROUP BY TOPOTHESIA_TMHMATOS , KATHGORIA"""
+        results = cursor.execute(sql).fetchall()
+        tmhma_kathgoria_foithtes = {result[0]: {} for result in results}
+        for i in results:
+            tmhma_kathgoria_foithtes[i[0]][i[1]] = i[2]
+        sql = """SELECT TOPOTHESIA_TMHMATOS ,COUNT(KATHGORIA)
+        FROM AITHSH_STEGASHS
+        GROUP BY TOPOTHESIA_TMHMATOS """
+        results = cursor.execute(sql).fetchall()
+        tmhma_foithtes = {result[0]: result[1] for result in results}
+        sql = """SELECT TOPOTHESIA , COUNT(TOPOTHESIA) AS TOTAL_ROOMS
+        FROM ESTIA
+        GROUP BY TOPOTHESIA;"""
+        results = cursor.execute(sql).fetchall()
+        total_rooms = {result[0]: result[1] for result in results}
+        supposed_rooms = {key: {} for key in tmhma_kathgoria_foithtes.keys()}
+        actual_rooms = {key: {} for key in tmhma_kathgoria_foithtes.keys()}
+        remaining_students = {key: {}
+                              for key in tmhma_kathgoria_foithtes.keys()}
+        for i in tmhma_kathgoria_foithtes.keys():
+            for j in tmhma_kathgoria_foithtes[i].keys():
+                supposed_rooms[i][j] = total_rooms[i] * options[j]
+                if math.floor(supposed_rooms[i][j]) <= tmhma_kathgoria_foithtes[i][j]:
+                    actual_rooms[i][j] = math.floor(supposed_rooms[i][j])
+                    remaining_students[i][j] = tmhma_kathgoria_foithtes[i][j] - \
+                        actual_rooms[i][j]
+        for key in tmhma_foithtes.keys():
+            if tmhma_foithtes[key] <= total_rooms[key]:
+                actual_rooms[key] = tmhma_kathgoria_foithtes[key]
+                # print(key)
+                continue
+            curr_rooms = sum(actual_rooms[key].values())
+            while True:
+                if curr_rooms == total_rooms[key]:
+                    break
+                for cat in remaining_students[key].keys():
+                    if curr_rooms == total_rooms[key]:
+                        break
+                    if remaining_students[key][cat] > 0:
+                        actual_rooms[key][cat] += 1
+                        remaining_students[key][cat] += -1
+                        curr_rooms += 1
+        return actual_rooms
+
+    def give_rooms(self, start_date, end_date):
+        actual_rooms = self.calculate_rooms()
+        cursor = self.conn.cursor()
+        for topothesia in actual_rooms:
+            for kathgoria in actual_rooms[topothesia]:
+                sql = """UPDATE KANEI_AITHSH
+                    SET KATASTASH = 'EPITYXHS'
+                    WHERE ID IN 
+                    (SELECT ID  
+                    FROM (
+                    SELECT ID ,(SYNOLIKO_EISODHMA_PATROS + SYNOLIKO_EISODHMA_MHTROS + SYNOLIKO_EISODHMA_IDIOU) AS SYNOLIKO
+                    FROM AITHSH_STEGASHS
+                    WHERE KATHGORIA = ? 
+                    AND
+                    TOPOTHESIA_TMHMATOS = ?
+                    ORDER BY SYNOLIKO
+                    LIMIT ?
+                    ))"""
+                cursor.execute(
+                    sql, (kathgoria, topothesia, actual_rooms[topothesia][kathgoria]))
+                sql = """SELECT ID  
+                            FROM (
+                            SELECT ID ,(SYNOLIKO_EISODHMA_PATROS + SYNOLIKO_EISODHMA_MHTROS + SYNOLIKO_EISODHMA_IDIOU) AS SYNOLIKO
+                            FROM AITHSH_STEGASHS
+                            WHERE KATHGORIA = ? 
+                            AND
+                            TOPOTHESIA_TMHMATOS = ?
+                            ORDER BY SYNOLIKO
+                            LIMIT ?)"""
+                ids = cursor.execute(
+                    sql, (kathgoria, topothesia, actual_rooms[topothesia][kathgoria])).fetchall()
+                for id in ids:
+                    sql = """SELECT ID_DOMATIOU
+                            FROM ESTIA
+                            WHERE TOPOTHESIA = ?
+                            AND 
+                            ID_DOMATIOU NOT IN
+                            (
+                            SELECT ID_DOMATIOU
+                            FROM DIAMENEI
+                            )
+                            LIMIT 1"""
+
+                    room = cursor.execute(sql, (topothesia,)).fetchall()
+                    if len(room) == 0:
+                        return -1
+                    am = cursor.execute(
+                        "SELECT AM FROM AITHSH_STEGASHS WHERE ID =?", (id[0],)).fetchall()[0][0]
+                    sql = """INSERT INTO DIAMENEI
+                    VALUES(?,?,?,?)"""
+                    cursor.execute(sql, (am, room[0][0], start_date, end_date))
+        sql = """UPDATE KANEI_AITHSH
+        SET KATASTASH = 'APORRIFTHHKE'
+        WHERE EIDOS_AITHSHS = 'ESTIAS' AND KATASTASH != 'EPITYXHS'"""
+        cursor.execute(sql)
+        self.conn.commit()
+
 
 if __name__ == "__main__":
     from datetime import datetime
@@ -89,7 +217,7 @@ if __name__ == "__main__":
     start_date = "1-09-" + year
     end_date = "31-08-" + str(int(year) + 1)
     db = DB_Connection("Data_Creation/merimna.db")
-    db.print_food_appl()
+    # db.print_food_appl()
     # db.print_housing_appl()
     # db.select_appl_to_review(1, "SITHSHS")
     db.generate_karta_sithshs(start_date, end_date)

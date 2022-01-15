@@ -22,9 +22,9 @@ def generate(excel_path, db_path):
         "ΑΝΕΡΓΗ",
         "ΓΥΜΝΑΣΤΡΙΑ",
     ]
-    topothesia_tmimatos = ["ΑΓΡΙΝΙΟ", "ΚΟΥΚΑΚΙ", "ΡΙΟ"]
+    topothesia_tmimatos = ["ΑΓΡΙΝΙΟ", "ΚΟΥΚΟΥΛΙ", "ΡΙΟ"]
     category = ["FIRST_YEAR", "OLDER_YEAR",
-                "POSTGRADUATE", "HOMOGENOUS", "FOREIGHN"]
+                "POSTGRADUATE", "HOMOGENOUS", "FOREIGN"]
     df = pd.read_excel(excel_path)
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -36,11 +36,30 @@ def generate(excel_path, db_path):
 
         for i in range(len(AM)):
             random.seed(AM[i][0])
-            katigoria = category[random.randint(0, 4)]
+            test5 = random.randint(1, 100)
+            if test5 <= 65:
+                katigoria = category[0]
+            elif test5 > 65 and test5 <= 85:
+                katigoria = category[1]
+            elif test5 > 85 and test5 <= 90:
+                katigoria = category[2]
+            elif test5 > 90 and test5 <= 96:
+                katigoria = category[3]
+            elif test5 > 96:
+                katigoria = category[4]
+            else:
+                katigoria = category[0]
             thl_gonea = random.randint(6930000000, 6999999999)
             ep_patros = epaggelma_patros[random.randint(0, 5)]
             ep_mhtros = epaggelma_mhtros[random.randint(0, 5)]
-            top_tmimatos = topothesia_tmimatos[random.randint(0, 2)]
+            test0 = random.randint(0, 20)
+            if test0 < 10:
+                top = 2
+            elif test0 > 16:
+                top = 1
+            else:
+                top = 0
+            top_tmimatos = topothesia_tmimatos[top]
             eis_patros = random.randint(4000, 40000)
             eis_mitros = random.randint(4000, 40000)
             eis_idiou = random.randint(4000, 40000)

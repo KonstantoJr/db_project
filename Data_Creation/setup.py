@@ -6,6 +6,7 @@ import KANEI_AITHSH
 import AITHSH_SITHSHS
 import AITHSH_STEGASHS
 import EGGRAFA
+import kouponia
 
 tables_init.generate("sqlite.sql", "merimna.db")
 FOITHTHS.generate("excel_files/Names.xls", "merimna.db")
@@ -15,3 +16,4 @@ KANEI_AITHSH.generate("merimna.db")
 AITHSH_SITHSHS.generate("excel_files/KATOIKIES.xls", "merimna.db")
 AITHSH_STEGASHS.generate("excel_files/KATOIKIES.xls", "merimna.db")
 EGGRAFA.generate("merimna.db")
+kouponia.generate("merimna.db")

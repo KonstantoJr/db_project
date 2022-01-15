@@ -1,4 +1,5 @@
 import sqlite3
+import pandas as pd
 
 
 class DB_Connection:
@@ -248,6 +249,21 @@ class DB_Connection:
         print("HM_AGORAS\t\tPOSOTHTA\tTIMH")
         for i in results:
             print(f"{i[0]}\t{i[1]}\t\t{i[2]}")
+
+    def print_room(self, am):
+        cursor = self.connection.cursor()
+        sql = """SELECT ID_DOMATIOU
+        FROM DIAMENEI
+        WHERE AM = ?"""
+        id = cursor.execute(sql, (am,)).fetchall()[0][0]
+        sql = """SELECT TOPOTHESIA , ONOMA , OROFOS , ARITHMOS
+        FROM ESTIA NATURAL JOIN DOMATIA
+        WHERE ID_DOMATIOU = ?"""
+        onoma = cursor.execute(sql, (id,)).fetchall()
+        names = [description[0] for description in cursor.description]
+        df = pd.DataFrame(onoma, columns=names)
+        with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.width', None, 'display.max_colwidth', -1):
+            print(df.to_string(index=False))
 
     def clear_table(self, table):
         cursor = self.connection.cursor()

@@ -119,7 +119,7 @@ class Menu:
                 print(
                     "There is already a food application\nTher status of the application is: SE ANAMONH"
                 )
-            elif results[0][3] == "APORRIFTHKE":
+            elif results[0][3] == "APORRIFTHHKE":
                 print("Your application has not been accepted")
             elif results[0][3] == "EPITYXHS":
                 print("Your application has been accepted")
@@ -219,10 +219,11 @@ class Menu:
                 print(
                     "There is already a housing application\nThe status of the application is: SE ANAMONH"
                 )
-            elif results[0][3] == "APORRIFTHKE":
+            elif results[0][3] == "APORRIFTHHKE":
                 print("Your application has not been accepted")
             elif results[0][3] == "EPITYXHS":
                 print("Your application has been accepted")
+                self.db.print_room(self.am)
                 # Code here
             elif results[0][3] == "ELLEIPHS":
                 print("Your application is missing something")
