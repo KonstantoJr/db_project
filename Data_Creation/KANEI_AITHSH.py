@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 import random_date
 
-
+# A function to generate applications for the table KANEI_AITHSH
 def generate(db_path):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()

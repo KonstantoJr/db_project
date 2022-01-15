@@ -1,4 +1,3 @@
-import enum
 import sqlite3
 import input_utils as iu
 import pandas as pd
@@ -8,7 +7,8 @@ import math
 class DB_Connection:
     def __init__(self, db_path) -> None:
         self.conn = sqlite3.connect(db_path)
-
+    # Prints all the pending for review applications
+    # depending on the 'eidos'
     def print_application(self, eidos) -> list:
         sql = ""
         if eidos == "SITHSHS":
@@ -28,6 +28,7 @@ class DB_Connection:
             return None
         names = [description[0] for description in cursor.description]
         ids = [row[0] for row in results]
+        # Pandas is used to print out the results of the following querries
         data = results
         df = pd.DataFrame(data, columns=names)
         if eidos == "SITHSHS":
@@ -39,6 +40,10 @@ class DB_Connection:
         print()
         return ids
 
+    # Given an id from the user the following function
+    # prints out again the info for the given id
+    # and then asks the user if the applications 
+    # is valid , missing something or is being rejected
     def select_appl_to_review(self, id, eidos_aithshs) -> None:
         if eidos_aithshs == "ESTIAS":
             sql = f"""SELECT * ,(SYNOLIKO_EISODHMA_PATROS + SYNOLIKO_EISODHMA_MHTROS+SYNOLIKO_EISODHMA_IDIOU) AS SYNOLIKO
@@ -75,7 +80,9 @@ class DB_Connection:
         WHERE ID = {id}"""
         cursor.execute(sql)
         self.conn.commit()
-
+    # A functions that generates the food cards
+    # If the application 'KATASTASH' is 'OLOKLHROTHHKE'
+    # that means a user has reviewed it and is being accepted
     def generate_karta_sithshs(self, start_date, end_date) -> None:
         sql = """SELECT ID , AM 
         FROM KANEI_AITHSH 
@@ -96,9 +103,14 @@ class DB_Connection:
             WHERE ID = {id}"""
             cursor.execute(sql)
         self.conn.commit()
-
+    # The following fucntions calculates, 
+    # given the total number of student for each loc and each category,
+    # how many rooms go to each category per location
     def calculate_rooms(self):
         cursor = self.conn.cursor()
+        # the options dictionary contains 
+        # the rates for each category of student
+        # Meaning that in the following example 40% of rooms go to FIRST_YEAR STUDENTS
         options = {
             "FIRST_YEAR": 0.40,
             "OLDER_YEAR": 0.30,
@@ -135,10 +147,15 @@ class DB_Connection:
                     remaining_students[i][j] = tmhma_kathgoria_foithtes[i][j] - \
                         actual_rooms[i][j]
         for key in tmhma_foithtes.keys():
+            # if the total applicants for a given location 
+            # are less than the total rooms provided to their location
+            # then all students get a room
             if tmhma_foithtes[key] <= total_rooms[key]:
                 actual_rooms[key] = tmhma_kathgoria_foithtes[key]
                 # print(key)
                 continue
+            # In case one category has less students than rooms
+            # then that room goes to the next category
             curr_rooms = sum(actual_rooms[key].values())
             while True:
                 if curr_rooms == total_rooms[key]:
@@ -151,7 +168,8 @@ class DB_Connection:
                         remaining_students[key][cat] += -1
                         curr_rooms += 1
         return actual_rooms
-
+    # The following function changes all the necessary attributes so
+    # and gives the appropriate room to each student
     def give_rooms(self, start_date, end_date):
         actual_rooms = self.calculate_rooms()
         cursor = self.conn.cursor()
@@ -210,14 +228,3 @@ class DB_Connection:
         self.conn.commit()
 
 
-if __name__ == "__main__":
-    from datetime import datetime
-
-    year = datetime.now().strftime("%Y")
-    start_date = "1-09-" + year
-    end_date = "31-08-" + str(int(year) + 1)
-    db = DB_Connection("Data_Creation/merimna.db")
-    # db.print_food_appl()
-    # db.print_housing_appl()
-    # db.select_appl_to_review(1, "SITHSHS")
-    db.generate_karta_sithshs(start_date, end_date)

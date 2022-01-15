@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 import random
 
-
+# A function to generate data to fill the table AITHSH_STEGASHS
 def generate(excel_path, db_path):
     epaggelma_patros = [
         "ΚΑΘΗΓΗΤΗΣ",
@@ -28,7 +28,7 @@ def generate(excel_path, db_path):
     df = pd.read_excel(excel_path)
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
-
+        # Query to get the AM ,ID already inside the db
         cursor.execute(
             "SELECT DISTINCT AM,ID FROM KANEI_AITHSH WHERE EIDOS_AITHSHS='ESTIAS'"
         )
@@ -96,7 +96,7 @@ def generate(excel_path, db_path):
                 meli_anagkes = 0
 
             adelfia_spoudazoun = random.randint(0, (meli_oik - 3))
-
+            # A query to insert the random generated data
             cursor.execute(
                 """INSERT INTO AITHSH_STEGASHS
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?); """,

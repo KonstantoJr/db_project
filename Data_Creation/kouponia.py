@@ -1,7 +1,7 @@
 import sqlite3
 import random
 import random_date
-
+import datetime
 def generate(db_path):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -12,7 +12,7 @@ def generate(db_path):
         VALUES(?,?,?,?,?)"""
         for am in results:
             for j in range(random.randint(0,2)):
-                date = random_date.random_date(am[0]+ j)
+                date = random_date.random_date(am[0]+ j) 
                 posotita = random.randint(5,10)
                 cursor.execute(sql, (ID, am[0], date, posotita, posotita*2))
                 ID += 1

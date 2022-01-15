@@ -19,7 +19,8 @@ class Menu:
                 self.housing_application()
             elif self.option == "-1":
                 return
-
+    #If the am given by the user is already in the database nothing happens
+    #If not then it requires the user to enter his name and phone number
     def login(self) -> None:
         am, _ = iu.input_number("Give your AM: ", "Not a number")
         if len(self.db.retrieval_query(f"SELECT * FROM FOITHTHS WHERE AM = {am}")) == 0:
@@ -28,7 +29,7 @@ class Menu:
                 "Write your cellphone: ", "Not a number")
             self.db.insert_student(name, am, phone)
         return am
-
+    # prints out a basic menu and waits for the user selection
     def basic_menu(self) -> None:
         print(
             f"\nPress 1 to buy food coupons\
@@ -38,22 +39,27 @@ class Menu:
         \nPress -1 to exit."
         )
         return input()
-
+    # Asks the user for how many coupons for food
+    # and then inserts the date of purchase inside the database
     def coupons(self) -> None:
         price = 2
         quantity, _ = iu.input_number(
             "Enter the quantity of coupons: ", "Not a number")
         quantity = int(quantity)
         date = datetime.datetime.now()
-        date = date.strftime("%d/%m/%y %H:%M:%S")
+        date = date.strftime("%Y-%m-%d")
         self.db.insert_purchase(quantity, self.am, date,
                                 total=price * quantity)
         print(f"Amount to pay = {price * quantity}")
 
+    # If the 'new' variable is true it means that the current student 
+    # applying has not yet made an application for food
+    # Else, the id field needs to be provided so we can update 
+    # the application already inside the db
     def food_application_form(self, new: bool, id=None) -> None:
         eidos_app = "SITHSHS"
         date = datetime.datetime.now()
-        date = date.strftime("%x")
+        date = date.strftime("%Y-%m-%d")
         if new == True:
             print("No food application found")
             print("Would you like to make one?")
@@ -107,7 +113,14 @@ class Menu:
             #
             self.db.del_files(id)
             self.add_files(id)
-
+    # checks if there is an application in the db
+    # If not then he promts the user to make one
+    # else it gives the current state of the application
+    # and promts the user to do somthing else
+    # in the case of a 'missing something' application
+    # the user gets a prompt to re sumbit his application
+    # in the case of a successful application then the id number for that card is given 
+    # to the student
     def food_application(self) -> None:
         eidos_app = "SITHSHS"
         query = f"""SELECT * FROM KANEI_AITHSH WHERE AM = {self.am} AND EIDOS_AITHSHS = '{eidos_app}'"""
@@ -135,6 +148,10 @@ class Menu:
                 )
                 self.food_application_form(False, results[0][0])
 
+    # If the 'new' variable is true it means that the current student 
+    # applying has not yet made an application for housing
+    # Else, the id field needs to be provided so we can update 
+    # the application already inside the db
     def housing_application_form(self, new: bool, id=None):
         eidos_app = "ESTIAS"
         date = datetime.datetime.now()
@@ -208,6 +225,15 @@ class Menu:
             self.db.del_files(id)
             self.add_files(id)
 
+    # checks if there is an application in the db
+    # If not then he promts the user to make one
+    # else it gives the current state of the application
+    # and promts the user to do somthing else
+    # in the case of a 'missing something' application
+    # the user gets a prompt to re sumbit his application
+    # in the case of a successful application then the 
+    # floor, room , location , and name for the room 
+    # he was assigned is given to the student
     def housing_application(self) -> None:
         eidos_app = "ESTIAS"
         query = f"""SELECT * FROM KANEI_AITHSH WHERE AM = {self.am} AND EIDOS_AITHSHS = '{eidos_app}'"""
@@ -232,6 +258,7 @@ class Menu:
                 )
                 self.housing_application_form(False, results[0][0])
 
+    # Asks the user for the files he wants to submit
     def add_files(self, id):
         file = input(
             "Enter the path of the file you want to submit.\nPress enter to stop submitting.\n"

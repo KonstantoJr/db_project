@@ -26,12 +26,17 @@ def input_method(text: str, error: str, options: dict):
             return options[inp]
         print(error)
 
-
+# A basic function to get the user info 
+# needed to fill out a housing application
 def housing_appl_form_input():
+    # I is a dictionary containing all the the needed information
     I = {"kathgoria": None, "dnsh_monimhs": None, "thl_goneon": None, "epaggelma_patros": None, "epaggelma_mhtros": None, "topothesia_tmhmatos": None, "total_patros": None, "total_mhtros": None, "total_idiou": None, "ar_melon": None, "adelfia_pou_spoudazoun": None,
          "goneis_me_eidikes_anagkes": None, "diazeugmenoi_goneis": None, "orfanos_apo_enan_gonea": None, "poluteknh_oikogenia": None, "stratiotikh_thhteia_aderfou": None, "melh_oikogenias_me_eidikes_anagkes": None}
     order = 0
     print("Fill out the following information\nPress -1 in any step to go back a step")
+    # The following loop breaks only when order >= 17
+    # In case the user wants to go back a step 
+    # he can write '-1' and then the order variable will become one less 
     while True:
         if order == 0:
             I["kathgoria"] = input_method(
@@ -86,9 +91,9 @@ def housing_appl_form_input():
                             \nPress -1 to go back\n",
                 "Not an option",
                 options={
-                    "1": "Πανεπιστημιούπολη Ρίο",
-                    "2": "Κουκούλι Πατρών",
-                    "3": "Αγρίνιο",
+                    "1": "ΡΙΟ",
+                    "2": "ΚΟΥΚΟΥΛΙ",
+                    "3": "ΑΓΡΙΝΙΟ",
                     "-1": -1
                 },
             )
@@ -124,7 +129,7 @@ def housing_appl_form_input():
                         \nPress 2 for NO\
                         \nPress -1 to go back\n",
                 "Not an option",
-                options={"1": "ΝΑΙ", "2": "ΟΧΙ", "-1": -1},
+                options={"1": 1, "2": 0, "-1": -1},
             )
             if I["goneis_me_eidikes_anagkes"] == -1:
                 order += -1
@@ -137,7 +142,7 @@ def housing_appl_form_input():
                         \nPress 2 for NO\
                         \nPress -1 to go back\n",
                 "Not an option",
-                options={"1": "ΝΑΙ", "2": "ΟΧΙ", "-1": -1},
+                options={"1": 1, "2": 0, "-1": -1},
             )
             if I["diazeugmenoi_goneis"] == -1:
                 order += -1
@@ -150,7 +155,7 @@ def housing_appl_form_input():
                         \nPress 2 for NO\
                         \nPress -1 to go back\n",
                 "Not an option",
-                options={"1": "ΝΑΙ", "2": "ΟΧΙ", "-1": -1},
+                options={"1": 1, "2": 0, "-1": -1},
             )
             if I["orfanos_apo_enan_gonea"] == -1:
                 order += -1
@@ -163,7 +168,7 @@ def housing_appl_form_input():
                         \nPress 2 for NO\
                         \nPress -1 to go back\n",
                 "Not an option",
-                options={"1": "ΝΑΙ", "2": "ΟΧΙ", "-1": -1},
+                options={"1": 1, "2": 0, "-1": -1},
             )
             if I["poluteknh_oikogenia"] == -1:
                 order += -1
@@ -176,7 +181,7 @@ def housing_appl_form_input():
                         \nPress 2 for NO\
                         \nPress -1 to go back\n",
                 "Not an option",
-                options={"1": "ΝΑΙ", "2": "ΟΧΙ", "-1": -1},
+                options={"1": 1, "2": 0, "-1": -1},
             )
             if I["stratiotikh_thhteia_aderfou"] == -1:
                 order += -1
@@ -190,7 +195,9 @@ def housing_appl_form_input():
         elif order >= 17:
             return I
 
-
+# A basic function to get the input from the user
+# Like the above function if the user gives -1
+# Then it goes back step
 def food_application_form_input():
     order = 0
     I = {

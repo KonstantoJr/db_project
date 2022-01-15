@@ -4,16 +4,15 @@ import pandas as pd
 
 class DB_Connection:
     def __init__(self, path_name) -> None:
-        self.connection = None
         self.connection = sqlite3.connect(path_name)
-
+    #Inserts a new student into the database
     def insert_student(self, name, am, phone) -> None:
         cursor = self.connection.cursor()
         sql = """INSERT INTO FOITHTHS(AM , ONOMA , THLEFONO)
         VALUES(?,?,?)"""
         cursor.execute(sql, (am, name, phone))
         self.connection.commit()
-
+    # Inserts a new purchase into the db
     def insert_purchase(self, quantity, am, date, total):
         cursor = self.connection.cursor()
         id = len(self.retrieval_query("""SELECT * FROM AGORA_KOUPONION""")) + 1
@@ -21,12 +20,12 @@ class DB_Connection:
         VALUES(?,?,?,?,?)"""
         cursor.execute(sql, (id, am, date, quantity, total))
         self.connection.commit()
-
+    # Gets an sql query and returns the contents
     def retrieval_query(self, sql: str) -> list:
         cursor = self.connection.cursor()
         results = cursor.execute(sql).fetchall()
         return results
-
+    # Insert a new application
     def insert_appl(self, am, hm, katastash, eidos_aithshs):
         cursor = self.connection.cursor()
         id = len(self.retrieval_query("""SELECT * FROM KANEI_AITHSH""")) + 1
@@ -34,14 +33,17 @@ class DB_Connection:
         VALUES(?,?,?,?,?)"""
         cursor.execute(sql, (id, am, hm, katastash, eidos_aithshs))
         self.connection.commit()
-
+    # deletes all the files inside the EGGRAFA table for a given id
+    # this is used only when one application needs to be re send
+    # because an admin marked as 'ELLEIPHS'
     def del_files(self, id):
         sql = f"""DELETE FROM EGGRAFA
         WHERE ID_AITHSHS = {id}"""
         cursor = self.connection.cursor()
         cursor.execute(sql)
         self.connection.commit()
-
+    # gets all the necessary infor in order to update 
+    # an existing food application
     def update_food_appl(
         self,
         id,
@@ -82,7 +84,8 @@ class DB_Connection:
         self.connection.commit()
         cursor.execute(sql2)
         self.connection.commit()
-
+    # Gets the necessary info to insert a new food
+    # application
     def insert_food_appl(
         self,
         id,
@@ -111,7 +114,8 @@ class DB_Connection:
         )
         cursor.execute(sql, values)
         self.connection.commit()
-
+    # Gets the necessary information to update
+    # an existing housing application
     def update_housing_appl(
             self,
             id,
@@ -180,7 +184,8 @@ class DB_Connection:
         )
         cursor.execute(sql2)
         self.connection.commit()
-
+    # Gets the necessary application in order to insert
+    # a new housing application
     def insert_housing_appl(
         self,
         id,
@@ -229,14 +234,14 @@ class DB_Connection:
         )
         cursor.execute(sql, values)
         self.connection.commit()
-
+    # Inserts the path of the file into the database
     def add_file(self, id, name):
         cursor = self.connection.cursor()
         sql = """INSERT INTO EGGRAFA 
         VALUES(?,?)"""
         cursor.execute(sql, (id, name))
         self.connection.commit()
-
+    # Returns the purchase history of a given user
     def purchase_history(self, am):
         sql = f"""SELECT HM_AGORAS, POSOTHTA , TIMH
         FROM AGORA_KOUPONION
@@ -249,7 +254,9 @@ class DB_Connection:
         print("HM_AGORAS\t\tPOSOTHTA\tTIMH")
         for i in results:
             print(f"{i[0]}\t{i[1]}\t\t{i[2]}")
-
+    # if the student's application for housing has been accepted 
+    # then the room he was given will be returned with the following 
+    # query
     def print_room(self, am):
         cursor = self.connection.cursor()
         sql = """SELECT ID_DOMATIOU
@@ -265,24 +272,5 @@ class DB_Connection:
         with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.width', None, 'display.max_colwidth', -1):
             print(df.to_string(index=False))
 
-    def clear_table(self, table):
-        cursor = self.connection.cursor()
-        cursor.execute(f"DELETE  FROM {table}")
-        self.connection.commit()
 
 
-if __name__ == "__main__":
-    db = DB_Connection("Data_Creation/merimna.db")
-    # db.insert_student("Κώστας Κωνσταντόπουλος", 1066546, 6948647574)
-    # print(db.retrieval_query("SELECT * FROM FOITHTHS WHERE AM = 1066546"))
-    # db.clear_table("KANEI_AITHSH")
-    # db.clear_table("AITHSH_STEGASHS")
-    # db.clear_table("AITHSH_SITHSHS")
-    # db.clear_table("EGGRAFA")
-    # db.clear_table("LAMVANEI")
-    # db.clear_table("KARTA_SITHSHS")
-    # db.clear_table("AGORA_KOUPONION")
-    #sql = """DROP TABLE IF EXISTS FOITHTHS"""
-    #cursor = db.connection.cursor()
-    # cursor.execute(sql)
-    # db.connection.commit()

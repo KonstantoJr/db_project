@@ -1,7 +1,8 @@
 import datetime
 import random
 
-
+# A function given seed will generate a random date between
+# start_date and end_date
 def random_date(am):
     random.seed(am)
 

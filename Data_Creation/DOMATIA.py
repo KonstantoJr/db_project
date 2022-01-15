@@ -1,10 +1,11 @@
 import sqlite3
 
-
+# A function to generate the data from table DOMATIA
 def generate(db_path):
     # pteryga = ["A1", "A2"]
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
+        # A query to get the ID_DOMATIOU from the data already in the db
         sql = """SELECT ID_DOMATIOU FROM ESTIA"""
         results = cursor.execute(sql).fetchall()
         id_domatiou = [id[0] for id in results]

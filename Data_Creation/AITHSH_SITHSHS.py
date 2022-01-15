@@ -2,12 +2,12 @@ import sqlite3
 import pandas as pd
 import random
 
-
+# A function to generate some data for the table AITHSH_SITHSHS
 def generate(excel_path, db_path):
     df = pd.read_excel(excel_path)
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
-
+        # sql query to retrieve all the AM , ID that exist already in the db
         cursor.execute(
             "SELECT DISTINCT AM,ID FROM KANEI_AITHSH WHERE EIDOS_AITHSHS='SITHSHS'"
         )
@@ -24,12 +24,12 @@ def generate(excel_path, db_path):
             eis_patros = random.randint(4000, 40000)
             eis_mitros = random.randint(4000, 40000)
             meli_oik = random.randint(3, 8)
+            # A query to insert the random generated data
             cursor.execute("""INSERT INTO AITHSH_SITHSHS
             VALUES (?,?,?,?,?,?,?,?,?);""",
                            (id, am, etos, katoikia, monimh,
                             barcode, eis_patros, eis_mitros,  meli_oik)
                            )
 
-        ##cursror.execute(sql, (m1, m2,m3))
 
         connection.commit()

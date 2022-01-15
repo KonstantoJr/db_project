@@ -1,7 +1,8 @@
 import sqlite3
 import random
 
-
+# A function to pick how many files each student sends
+# the amount is between 2 and 5
 def generate(db_path):
     with sqlite3.connect(db_path) as conn:
         cursor = conn.cursor()

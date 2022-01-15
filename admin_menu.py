@@ -4,8 +4,9 @@ from datetime import datetime
 
 
 class Admin:
-    def __init__(self) -> None:
-        self.db = sqlite_admin.DB_Connection("Data_Creation/merimna.db")
+    # Initialize the admin menu make the menu
+    def __init__(self , db_path) -> None:
+        self.db = sqlite_admin.DB_Connection(db_path)
         while True:
             self.option = self.login()
             if self.option == 1:
@@ -18,7 +19,7 @@ class Admin:
                 self.assign_rooms()
             elif self.option == -1:
                 return
-
+    # A basic menu to get the option from the user
     def login(self):
         login = iu.input_method(
             "Press 1 to check food applications\
@@ -29,6 +30,7 @@ class Admin:
             {"1": 1, "2": 2, "3": 3, "4": 4, "-1": -1})
         return login
 
+    # a functionto print out all the applications with a given 'eidos;
     def applications(self, eidos):
         while True:
             if eidos == "SITHSHS":
@@ -39,6 +41,8 @@ class Admin:
             if ids == None:
                 break
             ids = set(ids)
+            # A check to see if the id given by the user
+            # applies to the current applications he reviews
             while True:
                 print(ids)
                 id, _ = iu.input_number(
@@ -54,15 +58,18 @@ class Admin:
                 "If you want to continue press enter.\nElse press -1.\n")
             if option == "-1":
                 break
-
+    # A function to generate the food cards
     def generate_cards(self):
+        # Current academic year
         year = datetime.now().strftime("%Y")
         start_date = "1-09-" + year
         end_date = "31-08-" + str(int(year) + 1)
         self.db.generate_karta_sithshs(start_date, end_date)
         print("Cards have been generated successfully")
-
+    # A funcitons to assign the rooms to the 
+    # students
     def assign_rooms(self):
+        # Current academic year
         year = datetime.now().strftime("%Y")
         start_date = "1-09-" + year
         end_date = "31-08-" + str(int(year) + 1)
@@ -73,4 +80,4 @@ class Admin:
 
 
 if __name__ == "__main__":
-    menu = Admin()
+    menu = Admin("Data_Creation/merimna.db")

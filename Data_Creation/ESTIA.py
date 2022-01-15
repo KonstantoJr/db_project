@@ -1,6 +1,9 @@
 import sqlite3
 
-
+# A function to generate how many rooms has each ESTIA
+# In this example there are 3 locations
+# with each one having a name
+# To see how many rooms each loc has you check the list rooms
 def generate(db_path):
     loc = ["ΡΙΟ", "ΚΟΥΚΟΥΛΙ", "ΑΓΡΙΝΙΟ"]
     name = ["ΦΟΙΤΗΤΙΚΗ ΕΣΤΙΑ ΠΑΤΡΑΣ", "ΚΟΥΚΟΥΛΙ ΠΑΤΡΩΝ",
